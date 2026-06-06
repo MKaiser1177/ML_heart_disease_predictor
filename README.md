@@ -1,6 +1,6 @@
 # Heart Disease Predictor
 
-This repository contains a heart disease prediction project built with Python and scikit-learn. The analysis and model training are performed in `main.ipynb` using the `heart.csv` dataset.
+This repository contains a heart disease prediction project built with Python libraries like numpy, pandas and scikit-learn. The analysis and model training are performed in `main.ipynb` using the `heart.csv` dataset from Kaggle datasets.
 
 ## Project Overview
 
