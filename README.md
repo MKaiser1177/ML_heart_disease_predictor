@@ -1,56 +1,165 @@
-# Heart Disease Predictor
+# Heart Disease Predictor & React UI
 
-This repository contains a heart disease prediction project built with Python libraries like numpy, pandas and scikit-learn. The analysis and model training are performed in `main.ipynb` using the `heart.csv` dataset from Kaggle datasets.
+This repository contains an end-to-end heart disease prediction solution built with **Scikit-learn**, served via **FastAPI**, and accompanied by a modern **React.js** web interface.
 
-## Project Overview
+---
 
-- Load and inspect the heart disease dataset (`heart.csv`)
-- Split the data into training and test sets
-- Train multiple classification models:
-  - Random Forest
-  - Gaussian Naive Bayes
-  - Gradient Boosting
-  - K-Nearest Neighbors
-  - Logistic Regression
-  - Support Vector Classifier
-- Evaluate model performance using accuracy, recall, and ROC AUC
-- Perform hyperparameter tuning for the Random Forest model
-- Visualize feature importances and correlation heatmap
+## 🚀 Quick Start (Running Both UI & Backend)
 
-## Files
-
-- `main.ipynb` - Main Jupyter notebook with the full workflow and code
-- `heart.csv` - Dataset used for training and evaluation
-- `README.md` - Project documentation
-
-## Requirements
-
-Recommended Python packages:
-
-- pandas
-- numpy
-- scikit-learn
-- matplotlib
-- seaborn
-
-You can install the required packages using pip:
+The React web frontend is compiled into `frontend/dist` and directly served by FastAPI. You can launch the complete application with a single command:
 
 ```bash
-pip install pandas numpy scikit-learn matplotlib seaborn
+uvicorn app:app --reload
 ```
 
-## Usage
+Open your browser at **[http://127.0.0.1:8000](http://127.0.0.1:8000)** to interact with the UI.
 
-1. Open `main.ipynb` in Jupyter Notebook or JupyterLab.
-2. Run the notebook cells sequentially to load the data, train models, and evaluate performance.
-3. Review the output and visualizations for model comparison and feature importance.
+Interactive API documentation (Swagger UI) is available at **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**.
 
-## Notes
+---
 
-- The notebook includes both scale-insensitive models (Random Forest, Naive Bayes, Gradient Boosting) and scale-sensitive models (KNN, Logistic Regression, SVC).
-- Standard scaling is applied before training scale-sensitive models.
-- A grid search is used to find better hyperparameters for the Random Forest classifier.
+## 💻 Frontend Development (Vite + React)
 
-## License
+If you wish to modify or develop the React interface with Instant Hot Module Replacement (HMR):
 
-This project is provided for educational purposes.
+1. Navigate to the `frontend/` directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies (if not already installed):
+   ```bash
+   npm install
+   ```
+3. Start the Vite development server:
+   ```bash
+   npm run dev
+   ```
+4. Open **[http://localhost:3000](http://localhost:3000)**. API calls to `/predict` and `/health` are automatically proxied to `http://127.0.0.1:8000`.
+
+To build the production bundle:
+```bash
+npm run build
+```
+
+---
+
+## 🎨 UI Features
+
+- **Categorized Clinical Sections**:
+  - **Demographics**: Age and Biological Sex
+  - **Resting Vitals & Blood Chemistry**: Blood pressure, cholesterol levels, fasting blood sugar
+  - **Cardiac & Electrocardiography**: Chest pain type classification, resting ECG status, maximum heart rate achieved
+  - **Stress Testing & Fluoroscopy**: Exercise-induced angina, ST depression, ST slope, fluoroscopy major vessel count, thallium scintigraphy
+- **Quick Test Presets**:
+  - **Low Risk Profile**: Instant one-click load of a low-risk case
+  - **Moderate Profile**: Borderline markers (e.g. elevated blood pressure and ST depression)
+  - **High Risk Profile**: Symptomatic patient with elevated probability
+  - **Reset Form**: Restores baseline defaults
+- **Live Backend Connection Indicator**: Real-time heartbeat checking `/health` on FastAPI
+- **Risk Stratification Card**:
+  - Visual probability gauge (0% - 100%)
+  - High Risk vs. Low Risk status badge
+  - Biomarker summary highlighting critical flags (e.g. hypertension, elevated cholesterol, angina)
+  - Clinical guidance & educational disclaimer
+
+---
+
+## 🧠 Machine Learning Model & Pipeline
+
+- **Dataset**: Cleveland Heart Disease dataset (`heart.csv`) with 13 predictive clinical features.
+- **Model**: Scikit-Learn `RandomForestClassifier` trained via `pipeline.py`.
+- **Serialization**: Saved as a Joblib artifact in `model/model.joblib`.
+
+### Re-training the Model
+
+Run the training pipeline from the root directory:
+
+```bash
+python pipeline.py
+```
+
+Optional arguments:
+```bash
+python pipeline.py --data heart.csv --model-output model/model.joblib
+```
+
+---
+
+## 📡 API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Serves the React web app |
+| `GET` | `/health` | Health check endpoint returning `{"status": "healthy"}` |
+| `POST` | `/predict` | Evaluates the 13 clinical biomarkers and returns prediction & risk probability |
+| `GET` | `/docs` | OpenAPI / Swagger interactive documentation |
+
+### Example Request (`POST /predict`):
+
+```json
+{
+  "age": 52,
+  "sex": 1,
+  "cp": 0,
+  "trestbps": 125,
+  "chol": 212,
+  "fbs": 0,
+  "restecg": 1,
+  "thalach": 168,
+  "exang": 0,
+  "oldpeak": 1.0,
+  "slope": 2,
+  "ca": 2,
+  "thal": 3
+}
+```
+
+### Example Response:
+
+```json
+{
+  "prediction": 0,
+  "class_name": 0,
+  "probability": {
+    "absence": 0.985,
+    "presence": 0.015
+  },
+  "risk_score": 1.5
+}
+```
+
+---
+
+## 📁 Project Structure
+
+```
+ML_heart_disease_predictor/
+├── app.py                   # FastAPI backend server with static UI serving & CORS
+├── pipeline.py              # ML training and evaluation pipeline
+├── heart.csv                # Dataset
+├── model/
+│   └── model.joblib         # Serialized Scikit-learn Random Forest model
+├── main.ipynb               # Exploratory data analysis & model comparison notebook
+├── README.md                # Project documentation
+└── frontend/                # React.js application
+    ├── index.html
+    ├── package.json
+    ├── vite.config.js
+    └── src/
+        ├── main.jsx
+        ├── App.jsx
+        ├── index.css
+        ├── components/
+        │   ├── Header.jsx
+        │   ├── PresetSelector.jsx
+        │   ├── FormSection.jsx
+        │   └── PredictionCard.jsx
+        └── constants/
+            └── presets.js
+```
+
+---
+
+## ⚖️ License & Disclaimer
+
+This project is intended strictly for educational and screening assistance purposes. It does not replace professional medical diagnosis or clinical consultation.
